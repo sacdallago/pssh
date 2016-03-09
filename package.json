@@ -1,0 +1,37 @@
+{
+    "name": "PSSH Generator",
+    "version": "0.0.1",
+    "description": "Generate PSSH predictions and store them in the Aquaria database",
+    "main": "index.js",
+    "scripts": {
+        "start": "node app.js",
+        "test": "grunt"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/sacdallago/pssh.git"
+    },
+    "author": "Christian Dallago",
+    "license": "GNUv3",
+    "keywords": [
+        "rostlab",
+        "tum",
+    ],
+    "bugs": {
+        "url": "https://github.com/sacdallago/pssh/issues"
+    },
+    "homepage": "http://aquaria.ws",
+    "dependencies": {
+        "express": "latest",
+        "body-parser": "latest",
+        "q": "lates",
+        "node-uuid": "latest",
+        "formidable": "latest",
+        "nodemailer": "latest",
+        "forever": "latest",
+        "crypto" : "latest",
+        "password-generator" : "latest",
+        "console-stamp" : "latest",
+        "mysql" : "latest"
+    }
+}
