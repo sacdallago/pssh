@@ -4,6 +4,8 @@
  *  Created by Christian Dallago on 20160308 .
  */
 
+/*jshint esversion: 6 */
+
 var context;
 
 module.exports = {
@@ -65,96 +67,100 @@ module.exports = {
 
         // Test MySQL connection
         db.connect(function(error, connection) {
-            if (err) {
-                console.error('Error connecting to MySQL: ' + error.stack);
+            if (error) {
+                console.error('Error connecting to MySQL:');
+                console.error(error.stack);
                 return;
             }
             console.log('Connection test to MySQL worked.');
             console.log('Connected as id ' + connection.threadId);
-            connection.release()
-        });
 
-        // Initialize express
-        context.app = express();
-        context.app.use(bodyParser.json());
-        context.app.use(bodyParser.urlencoded({extended: true}));
 
-        // Initialize nodemailer
-        context.smtpTransporter = nodemailer.createTransport(config.email.defaultFrom);
+            // Initialize express
+            context.app = express();
+            context.app.use(bodyParser.json());
+            context.app.use(bodyParser.urlencoded({extended: true}));
 
-        // SetUp default email sender and subject from configuration
-        context.mailOptions = function(){
-            return {
-                from: config.email.defaultFrom,
-                subject: config.email.defaultSubject
-            }
-        };
+            // Initialize nodemailer
+            context.smtpTransporter = nodemailer.createTransport(config.email.defaultFrom);
 
-        // verify connection configuration 
-        context.smtpTransporter.verify(function(error, success) {
-            if (error) {
-                console.log("This node instance won't be able to send emails! Error: " + error);
-            } else {
-                console.log("This node instance is able to send emails.");
-            }
-        });
+            // SetUp default email sender and subject from configuration
+            context.mailOptions = function(){
+                return {
+                    from: config.email.defaultFrom,
+                    subject: config.email.defaultSubject
+                };
+            };
 
-        // Initialize router
-        context.router = new express.Router();
-
-        // Response for the 'home request'
-        context.app.get('/', function(request, response) {
-            response.send('<html><body>It works! The API is available under <strong>/api/*</strong></body></html>');
-        });
-
-        // Set router for the whole api
-        context.app.use('/api', context.router);
-        context.router.use(function(request, response, next) {
-
-            // Log each request to the console
-            console.log(request.method, request.url);
-
-            // Check that the head request contains the token in config or generate a new token.
-            var token = config.accessToken
-            if(!token){
-                token = context.uuid.v4();
-            }
-
-            console.log('Your requests must contain the token'+ token);
-            // Continue doing what we were doing and go to the route
-            return next();
-        });
-
-        // Function to load all components from the respective folders (models, controllers, services, daos, utils)
-        context.component = function(componentName) {
-            if (!context[componentName]) {
-                context[componentName] = {};
-            }
-
-            return {
-                module: function(moduleName) {
-                    if (!context[componentName][moduleName]) {
-                        console.log('Loading component ' + componentName);
-                        context[componentName][moduleName] = require(path.join(__dirname, componentName, moduleName))(context,
-                                                                                                                      componentName, moduleName);
-                        console.log('LOADED ' + componentName + '.' + moduleName);
-                    }
-
-                    return context[componentName][moduleName];
+            // verify connection configuration 
+            context.smtpTransporter.verify(function(error, success) {
+                if (error) {
+                    console.log("This node instance won't be able to send emails! Error: " + error);
+                } else {
+                    console.log("This node instance is able to send emails.");
                 }
-            }
-        };
+            });
 
-        // Initialize routes module in order to cover all services
-        // ALso kicks off loading of all modules
-        context.component('controllers').module('routes');
+            // Initialize router
+            context.router = new express.Router();
 
-        // Done, start server
-        console.log('Starting server...')
-        context.server = context.app.listen(context.config.app.port, function() {
-            console.log('SERVER LISTENING ON PORT %s', context.config.app.port);
-            console.log('---------- DONE BOOTSTRAPPING ----------');
-            done(context);
+            // Response for the 'home request'
+            context.app.get('/', function(request, response) {
+                response.send('<html><body>It works! The API is available under <strong>/api/*</strong></body></html>');
+            });
+
+            // Set router for the whole api
+            context.app.use('/api', context.router);
+            context.router.use(function(request, response, next) {
+
+                // Log each request to the console
+                console.log(request.method, request.url);
+
+                // Check that the head request contains the token in config or generate a new token.
+                var token = config.accessToken;
+                if(!token){
+                    token = context.uuid.v4();
+                }
+
+                console.log('Your requests must contain the token'+ token);
+
+                context.token = token;
+                // Continue doing what we were doing and go to the route
+                return next();
+            });
+
+            // Function to load all components from the respective folders (models, controllers, services, daos, utils)
+            context.component = function(componentName) {
+                if (!context[componentName]) {
+                    context[componentName] = {};
+                }
+
+                return {
+                    module: function(moduleName) {
+                        if (!context[componentName][moduleName]) {
+                            console.log('Loading component ' + componentName);
+                            context[componentName][moduleName] = require(path.join(__dirname, componentName, moduleName))(context,
+                                                                                                                          componentName, moduleName);
+                            console.log('LOADED ' + componentName + '.' + moduleName);
+                        }
+
+                        return context[componentName][moduleName];
+                    }
+                };
+            };
+
+            // Initialize routes module in order to cover all services
+            // ALso kicks off loading of all modules
+            context.component('controllers').module('routes');
+
+            // Done, start server
+            console.log('Starting server...');
+            context.server = context.app.listen(context.config.app.port, function() {
+                console.log('SERVER LISTENING ON PORT %s', context.config.app.port);
+                console.log('---------- DONE BOOTSTRAPPING ----------');
+                done(context);
+            });
+            connection.release();
         });
     },
 
