@@ -54,7 +54,7 @@ module.exports = {
         context.server = {};
 
         // Initialize MySQL connection
-        const db = context.mysql.createConnection({
+        context.db = context.mysql.createConnection({
             host     : config.mysql.url,
             port     : config.mysql.port,
             user     : config.mysql.username,
@@ -63,14 +63,21 @@ module.exports = {
         });
 
         // Test MySQL connection
-        db.connect(function(error, connection) {
+        context.db.connect(function(error, connection) {
             if (error) {
                 console.error('Error connecting to MySQL:');
-                console.error(error.stack);
-                return;
+                throw error;
             }
             console.log('Connection test to MySQL worked.');
         });
+
+        // Query constructor
+
+        context.queryConstructor = function(table, field, where){
+            var sql = "SELECT * FROM ?? WHERE ?? = ?";
+            var inserts = [table, field, where];
+            return context.mysql.format(sql, inserts);
+        };
 
         // Initialize express
         context.app = express();

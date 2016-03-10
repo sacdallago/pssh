@@ -26,5 +26,5 @@ module.exports = function(context) {
     });
 
     // Load all services we need
-    // const someService = context.component('services').module('some');
+    const userSequenceService = context.component('services').module('userSequence');
 };
