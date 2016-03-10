@@ -25,7 +25,6 @@ module.exports = {
     },
     security: {
         key: './certificates/key.pem',
-        cert: './certificates/cert.pem',
-        requestCert: true
+        cert: './certificates/cert.pem'
     }
 };
