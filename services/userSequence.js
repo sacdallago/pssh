@@ -13,7 +13,7 @@ module.exports = function(context) {
 
     // Routes
     context.router
-        .get('/md5/:md5', userSequenceController.getMD5Status)
-        .get('/sequence/:sequence', userSequenceController.getSequenceStatus)
+        .get('/md5/:md5', userSequenceController.getMD5)
+        .get('/sequence/:sequence', userSequenceController.getSequence)
         .post('/sequence', userSequenceController.generatePSSH);
 };

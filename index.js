@@ -48,10 +48,10 @@ module.exports = {
             const uuid = require('node-uuid');
             const formidable = require('formidable');
             const nodemailer = require('nodemailer');
-            const crypto = require('crypto');
             const passwordGenerator = require('password-generator');
             const mysql = require('mysql');
 
+            const crypto = require('crypto');
             const path = require('path');
             const util = require('util');
             const fs = require('fs');
