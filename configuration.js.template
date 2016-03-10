@@ -22,5 +22,10 @@ module.exports = {
         connection: "'smtps://user%40gmail.com:pass@smtp.gmail.com'",
         defaultFrom: '"Aquaria" <no-reply@aquaria.ws>',
         defaultSubject: 'Notification from Aquaria'
+    },
+    security: {
+        key: './certificates/key.pem',
+        cert: './certificates/cert.pem',
+        requestCert: true
     }
 };
