@@ -15,5 +15,6 @@ module.exports = function(context) {
     context.router
         .get('/md5/:md5', userSequenceController.getMD5)
         .get('/sequence/:sequence', userSequenceController.getSequence)
-        .post('/sequence', userSequenceController.generatePSSH);
+        .post('/sequence', userSequenceController.psshFromSequence)
+        .post('/fasta', userSequenceController.psshFromFasta);
 };

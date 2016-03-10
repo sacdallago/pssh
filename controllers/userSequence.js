@@ -31,7 +31,7 @@ module.exports = function(context) {
                 return response.status(500).send(error);
             });
         },
-        generatePSSH: function(request, response) {
+        psshFromSequence: function(request, response) {
             const sequence = request.body.sequence;
             const email = request.body.email;
 
@@ -48,6 +48,21 @@ module.exports = function(context) {
                 console.error("Error while trying to insert sequence");
                 return response.status(500).send(error);
             });
+        },
+        psshFromFasta: function(request, response) {
+            
+            ///////// STOPPED HERE
+            /// Difference between url-encoded and form data!
+            const formidable = context.formidable;
+            const form = new formidable.IncomingForm();
+
+            form.parse(request, function(error, fields, files) {
+                console.log(error);
+                console.log(fields);
+                console.log(files);
+                return response.status(200).send();
+            });
+            ///////// STOPPED HERE
         },
         getSequence: function(request,response){
             const sequence = request.params.sequence;
