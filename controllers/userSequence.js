@@ -12,7 +12,7 @@ module.exports = function(context) {
     const userSequenceDao = context.component('daos').module('userSequence');
 
     return {
-        getStatus: function(request, response) {
+        getMD5Status: function(request, response) {
             return response.status(404).send({
                 message: 'Sequence request not found'
             });
@@ -20,6 +20,22 @@ module.exports = function(context) {
         generatePSSH: function(request, response) {
             return response.status(201).send({
                 message: 'Sequence is being processed.'
+            });
+        },
+        getSequenceStatus: function(request,response){
+            const sequence = request.params.sequence;
+            userSequenceDao.findBySequence(sequence).then(function(data){
+                if(data.length < 1){
+                    return response.status(404).send({
+                        data: [],
+                        count: 0
+                    });
+                } else {
+                    return response.status(200).send({
+                        data: data,
+                        count: data.length
+                    });
+                }
             });
         }
     };

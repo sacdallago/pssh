@@ -13,11 +13,20 @@ module.exports = function(context) {
 
     return {
         findBySequence: function(sequence){
-            context.db.query('SELECT 1 + 1 AS solution', function(err, rows, fields) {
-                if (err) throw err;
+            var deferred = context.promises.defer();
 
-                console.log('The solution is: ', rows[0].solution);
+            var query = context.queryConstructor('protein_sequence_unified','sequence',sequence);
+
+            console.log("QUERYING: " + query);
+
+            context.db.query(query, function(err, rows, fields) {
+                if (err){
+                    deferred.reject(error);
+                } else {
+                    deferred.resolve(rows);
+                }
             });
+            return deferred.promise;
         }
     };
 };
