@@ -64,4 +64,4 @@ configuration.js
 
 # Private and temp files
 private/
-!/certificates/readme.md
+certificates/
