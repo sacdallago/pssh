@@ -26,6 +26,7 @@ module.exports = {
         const path = require('path');
         const util = require('util');
         const fs = require('fs');
+        const https = require('https');
 
         const config = require('./configuration');
 
@@ -72,11 +73,17 @@ module.exports = {
         });
 
         // Query constructor
-
         context.queryConstructor = function(table, field, where){
             var sql = "SELECT * FROM ?? WHERE ?? = ?";
             var inserts = [table, field, where];
             return context.mysql.format(sql, inserts);
+        };
+
+        // Load HTTPS layer
+        var securityOptions = {
+            key: context.fs.readFileSync(context.config.security.key),
+            cert: context.fs.readFileSync(context.config.security.cert),
+            requestCert: true
         };
 
         // Initialize express
@@ -160,7 +167,10 @@ module.exports = {
 
         // Done, start server
         console.log('Starting server...');
-        context.server = context.app.listen(context.config.app.port, function() {
+        
+        context.server = https
+            .createServer(securityOptions, context.app)
+            .listen(context.config.app.port, function() {
             console.log('SERVER LISTENING ON PORT %s', context.config.app.port);
             console.log('---------- DONE BOOTSTRAPPING ----------');
             done(context);
