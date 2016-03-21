@@ -32,7 +32,8 @@
     "crypto": "latest",
     "password-generator": "latest",
     "console-stamp": "latest",
-    "mysql": "latest"
+    "mysql": "latest",
+    "biojs-io-fasta": "latest"
   },
   "devDependencies": {
     "grunt": "^0.4.5",

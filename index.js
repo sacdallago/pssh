@@ -50,6 +50,7 @@ module.exports = {
             const nodemailer = require('nodemailer');
             const passwordGenerator = require('password-generator');
             const mysql = require('mysql');
+            const biojs = require('biojs-io-fasta');
 
             const crypto = require('crypto');
             const path = require('path');
@@ -86,6 +87,7 @@ module.exports = {
             context.crypto = crypto;
             context.passwordGenerator = passwordGenerator;
             context.mysql = mysql;
+            context.biojs = biojs;
 
             context.smtpTransporter = {};
             context.app = {};
