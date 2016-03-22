@@ -37,7 +37,8 @@ module.exports = {
 
             cluster.on('exit', (worker, code, signal) => {
                 console.log(`worker ${worker.process.pid} died`);
-                cluster.fork();
+                var newWorker = cluster.fork();
+                console.log("Spwaning worker " + newWorker.id);
             });
         } else {
 

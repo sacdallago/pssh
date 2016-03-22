@@ -87,30 +87,75 @@ module.exports = function(context) {
 
                 form.parse(request, function(error, fields, files) {
                     const email = fields.email;
+                    const file = files.fasta;
 
-                    try {
-                        var sequences = context.biojs.parse(textFile);
-                        sequences.forEach(function(sequence){
-                            const seq  = sequence.seq.replace(new RegExp("[\\*|\\s]", 'g'), "");
-                            const md5 = context.crypto.createHash('md5').update(seq).digest('hex');
-
-                            userSequenceDao.insertInProteinSequenceUpload(email, seq, md5).then(function(data){
-                                return response.status(201).send(data);
-                            }, function(error){
-                                console.error("Error while trying to insert sequence:");
-                                console.error(error.code);
-                                return response.status(500).send(error);
-                            });
-                        });
-
-                    } catch (err) {
-                        console.error("Could not generate MD5 hash");
-                        return response.status(500).send("Could not generate MD5 hash");
+                    if(!email || !file){
+                        return response.status(500).send("Allowed calls include:\n"+
+                                                         "- multipart/form-data\n"+
+                                                         "With attributes 'email' and 'fasta'\n"
+                                                        );
                     }
+
+                    context.fs.readFile(file.path, 'utf8', function (fileError, fileData) {
+                        if (fileError) {
+                            return response.status(500).send({
+                                message: "Internal Server error when reading file."
+                            });
+                        }
+
+                        try {
+                            var sequences = context.biojs.parse(fileData);
+                            var promises = [];
+
+                            sequences.forEach(function(sequence){
+                                var deferred = context.promises.defer();
+                                promises.push(deferred.promise);
+
+                                const seq  = sequence.seq.replace(new RegExp("[\\*|\\s]", 'g'), "");
+                                if(seq.length < 1){
+                                    deferred.resolve({
+                                        md5: undefined,
+                                        sequence: undefined,
+                                        error: "Not able to parse sequence"
+                                    });
+                                } else {
+                                    const md5 = context.crypto.createHash('md5').update(seq).digest('hex');
+                                    const description = sequence.name;
+
+                                    userSequenceDao.insertInProteinSequenceUpload(email, seq, md5, description).then(function(data){
+                                        deferred.resolve({
+                                            md5: md5,
+                                            sequence: seq
+                                        });
+                                    }, function(error){
+                                        deferred.resolve({
+                                            md5: md5,
+                                            sequence: seq,
+                                            error: error
+                                        });
+                                    });   
+                                }
+                            });
+                            context.promises.all(promises).then(function(results) {
+                                return response.status(200).send({
+                                    succesful: results.filter(function(element){
+                                        return undefined == element.error;
+                                    }),
+                                    unsuccesful: results.filter(function(element){
+                                        return element.error != undefined;
+                                    })
+                                });
+                            });
+                        } catch (err) {
+                            console.error("Could not generate MD5 hash");
+                            return response.status(500).send("Could not generate MD5 hash");
+                        }
+                    });
                 });
             } else {
                 return response.status(500).send("Allowed calls include:\n"+
-                                                 "- multipart/form-data\n"
+                                                 "- multipart/form-data\n"+
+                                                 "With attributes 'email' and 'fasta'\n"
                                                 );
             }
         },

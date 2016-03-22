@@ -43,10 +43,14 @@ module.exports = function(context) {
             return deferred.promise;
         },
         
-        insertInProteinSequenceUpload: function(email, sequence, md5){
+        insertInProteinSequenceUpload: function(email, sequence, md5, description){
             var deferred = context.promises.defer();
 
-            var query = context.mysql.format("INSERT INTO `protein_sequence_uploaded` (`email`, `sequence`, `md5_hash`) VALUES (?,?,?);", [email, sequence, md5]); 
+            var query = context.mysql.format("INSERT INTO `protein_sequence_uploaded` (`email`, `sequence`, `md5_hash`) VALUES (?,?,?);", [email, sequence, md5]);
+            
+            if(description){
+                query = context.mysql.format("INSERT INTO `protein_sequence_uploaded` (`email`, `sequence`, `md5_hash`, `description`) VALUES (?,?,?,?);", [email, sequence, md5, description]);
+            } 
 
             console.log("QUERYING: " + query);
 
