@@ -139,10 +139,10 @@ module.exports = function(context) {
                             context.promises.all(promises).then(function(results) {
                                 return response.status(200).send({
                                     succesful: results.filter(function(element){
-                                        return undefined == element.error;
+                                        return undefined === element.error;
                                     }),
                                     unsuccesful: results.filter(function(element){
-                                        return element.error != undefined;
+                                        return element.error !== undefined;
                                     })
                                 });
                             });
