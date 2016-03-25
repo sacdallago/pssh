@@ -15,7 +15,7 @@ module.exports = {
         const numCPUs = require('os').cpus().length;
         const cluster = require('cluster');
         const consoleStamp = require('console-stamp');
-        
+
         if (cluster.isMaster) {
             // Setup timestamps for logging
             consoleStamp(console,{
@@ -28,7 +28,7 @@ module.exports = {
                     metadata: "red"
                 }
             } );
-            
+
             // Fork workers.
             for (var i = 0; i < numCPUs; i++) {
                 var worker = cluster.fork();
@@ -58,6 +58,7 @@ module.exports = {
             const util = require('util');
             const fs = require('fs');
             const https = require('https');
+            const childProcess = require('child_process');
 
             const config = require('./configuration');
 
@@ -89,6 +90,7 @@ module.exports = {
             context.passwordGenerator = passwordGenerator;
             context.mysql = mysql;
             context.biojs = biojs;
+            context.childProcess = childProcess;
 
             context.smtpTransporter = {};
             context.app = {};
