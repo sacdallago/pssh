@@ -9,7 +9,8 @@
 module.exports = function(context) {
 
     // Daos
-    const userSequenceDao = context.component('daos').module('userSequence');
+    const proteinSequenceUserDao = context.component('daos').module('proteinSequenceUser');
+    const psshUserDao = context.component('daos').module('psshUser');
 
     // Internal functions
     const spawnPSSH = function(sequence){
@@ -22,29 +23,10 @@ module.exports = function(context) {
                 console.error('Failed to calculate PSSH', sequence);
             }
         });
+        return;
     };
 
     return {
-        getMD5: function(request, response) {
-            const md5 = request.params.md5;
-            userSequenceDao.findByMD5(md5).then(function(data){
-                if(data.length < 1){
-                    return response.status(404).send({
-                        data: [],
-                        count: 0
-                    });
-                } else {
-                    return response.status(200).send({
-                        data: data,
-                        count: data.length
-                    });
-                }
-            }, function(error){
-                console.error("Error while getting sequence via MD5:");
-                console.error(error.code);
-                return response.status(500).send(error);
-            });
-        },
         psshFromSequence: function(request, response) {
             if(request.is("application/x-www-form-urlencoded") || request.is("application/json") ) {
                 const sequence = request.body.sequence;
@@ -52,7 +34,7 @@ module.exports = function(context) {
 
                 try {
                     const md5 = context.crypto.createHash('md5').update(sequence).digest('hex');
-                    userSequenceDao.insertInProteinSequenceUpload(email, sequence, md5).then(function(data){
+                    proteinSequenceUserDao.insertInProteinSequenceUpload(email, sequence, md5).then(function(data){
                         return response.status(201).send(data);
                     }, function(error){
                         console.error("Error while trying to insert sequence:");
@@ -73,7 +55,7 @@ module.exports = function(context) {
 
                     try {
                         const md5 = context.crypto.createHash('md5').update(sequence).digest('hex');
-                        userSequenceDao.insertInProteinSequenceUpload(email, sequence, md5).then(function(data){
+                        proteinSequenceUserDao.insertInProteinSequenceUpload(email, sequence, md5).then(function(data){
                             return response.status(201).send(data);
                         }, function(error){
                             console.error("Error while trying to insert sequence:");
@@ -117,7 +99,7 @@ module.exports = function(context) {
                                 message: "Internal Server error when reading Fasta file."
                             });
                         }
-                        
+
                         var sequences = [];
 
                         try {
@@ -135,8 +117,37 @@ module.exports = function(context) {
                                                                  "If sending fasta + pssh files, only one sequence can be present in the fasta file."
                                                                 );
                             } else {
-                                // Insert sequence with pssh_calculated = 1 + insert PSSH
-                                return response.status(200).send();
+                                // Try to insert FASTA here, then if inserted, go on.
+                                context.fs.readFile(pssh.path, 'utf8', function (psshError, psshData) {
+                                    if(psshError){
+                                        return response.status(500).send({
+                                            message: "Internal Server error when reading pssh2 file."
+                                        });
+                                    } else {
+                                        var psshArray = context.psshParser.parsePSSH2file(psshData);
+                                        // Insert sequence with pssh_calculated = 1 + insert PSSH
+
+                                        psshArray = psshArray.map(function(element){
+                                            return [
+                                                element.protein_sequence_hash,
+                                                element.PDB_chain_hash,
+                                                element.Repeat_domains,
+                                                element.E_value,
+                                                element.Identity_Score,
+                                                element.Match_length,
+                                                element.Alignment
+                                            ];
+                                        });
+                                        psshUserDao.insertInPSSHUser(psshArray).then(function(data){
+                                            return response.status(201).send(data);
+                                        }, function(error){
+                                            console.error("Error while trying to insert pssh:");
+                                            console.error(error.code);
+                                            return response.status(500).send(error);
+                                        });
+                                    }
+                                });
+
                             }
                         } else {
                             var promises = [];
@@ -156,7 +167,7 @@ module.exports = function(context) {
                                     const md5 = context.crypto.createHash('md5').update(seq).digest('hex');
                                     const description = sequence.name;
 
-                                    userSequenceDao.insertInProteinSequenceUpload(email, seq, md5, description).then(function(data){
+                                    proteinSequenceUserDao.insertInProteinSequenceUpload(email, seq, md5, description).then(function(data){
                                         deferred.resolve({
                                             md5: md5,
                                             sequence: seq
@@ -193,26 +204,6 @@ module.exports = function(context) {
                                                  "If sending fasta + pssh files, only one sequence can be present in the fasta file."
                                                 );
             }
-        },
-        getSequence: function(request,response){
-            const sequence = request.params.sequence;
-            userSequenceDao.findBySequence(sequence).then(function(data){
-                if(data.length < 1){
-                    return response.status(404).send({
-                        data: [],
-                        count: 0
-                    });
-                } else {
-                    return response.status(200).send({
-                        data: data,
-                        count: data.length
-                    });
-                }
-            }, function(error){
-                console.error("Error while getting sequence:");
-                console.error(error.code);
-                return response.status(500).send(error);
-            });
         }
     };
 };

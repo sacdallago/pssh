@@ -33,7 +33,8 @@
     "password-generator": "latest",
     "console-stamp": "latest",
     "mysql": "latest",
-    "biojs-io-fasta": "latest"
+    "biojs-io-fasta": "latest",
+    "pssh-parser": "latest"
   },
   "devDependencies": {
     "grunt": "^0.4.5",

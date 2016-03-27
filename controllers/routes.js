@@ -34,5 +34,6 @@ module.exports = function(context) {
     });
 
     // Load all services we need
-    const userSequenceService = context.component('services').module('userSequence');
+    const proteinSequenceUserService = context.component('services').module('proteinSequenceUser');
+    const proteinSequenceUnifiedService = context.component('services').module('proteinSequenceUnified');
 };

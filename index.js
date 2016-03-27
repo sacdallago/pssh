@@ -52,6 +52,7 @@ module.exports = {
             const passwordGenerator = require('password-generator');
             const mysql = require('mysql');
             const biojs = require('biojs-io-fasta');
+            const psshParser = require('pssh-parser');
 
             const crypto = require('crypto');
             const path = require('path');
@@ -91,6 +92,7 @@ module.exports = {
             context.mysql = mysql;
             context.biojs = biojs;
             context.childProcess = childProcess;
+            context.psshParser = psshParser;
 
             context.smtpTransporter = {};
             context.app = {};
