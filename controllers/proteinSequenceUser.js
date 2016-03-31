@@ -39,7 +39,7 @@ module.exports = function(context) {
                     }, function(error){
                         console.error("Error while trying to insert sequence:");
                         console.error(error.code);
-                        return response.status(500).send(error);
+                        return response.status(422).send(error);
                     });
                 } catch (err) {
                     console.error("Could not generate MD5 hash");
@@ -60,7 +60,7 @@ module.exports = function(context) {
                         }, function(error){
                             console.error("Error while trying to insert sequence:");
                             console.error(error.code);
-                            return response.status(500).send(error);
+                            return response.status(422).send(error);
                         });
                     } catch (err) {
                         console.error("Could not generate MD5 hash");
@@ -68,7 +68,7 @@ module.exports = function(context) {
                     }
                 });
             } else {
-                return response.status(403).send("Allowed calls include:\n"+
+                return response.status(415).send("Allowed calls include:\n"+
                                                  "- multipart/form-data\n"+
                                                  "- application/x-www-form-urlencoded\n"+
                                                  "- application/json"
@@ -86,7 +86,7 @@ module.exports = function(context) {
                     const pssh = files.pssh;
 
                     if(!email || !fasta){
-                        return response.status(403).send("Allowed calls include:\n"+
+                        return response.status(415).send("Allowed calls include:\n"+
                                                          "- multipart/form-data\n"+
                                                          "With attributes 'email', 'fasta' and optional 'pssh'\n"+
                                                          "If sending fasta + pssh files, only one sequence can be present in the fasta file."
@@ -111,7 +111,7 @@ module.exports = function(context) {
 
                         if(pssh){
                             if(sequences.length != 1){
-                                return response.status(403).send("Allowed calls include:\n"+
+                                return response.status(415).send("Allowed calls include:\n"+
                                                                  "- multipart/form-data\n"+
                                                                  "With attributes 'email', 'fasta' and optional 'pssh'\n"+
                                                                  "If sending fasta + pssh files, only one sequence can be present in the fasta file."
@@ -198,7 +198,7 @@ module.exports = function(context) {
                     });
                 });
             } else {
-                return response.status(403).send("Allowed calls include:\n"+
+                return response.status(415).send("Allowed calls include:\n"+
                                                  "- multipart/form-data\n"+
                                                  "With attributes 'email', 'fasta' and optional 'pssh'\n"+
                                                  "If sending fasta + pssh files, only one sequence can be present in the fasta file."
