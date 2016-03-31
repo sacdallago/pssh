@@ -18,19 +18,77 @@ You can find all the possible calls in the `services` folder, in separate files 
 For now, you can:
 
 - GET `/api/sequence/:sequence`: Returns the entry from `protein_sequence_unified` if `:sequence` matches an entry, or error instead.
-   - 200, Success: 
+   - 200, Success:
+
      ```javascript
       {
         "data": [
-          {
-            "Primary_Accession": null,
-            "Sequence": "testest",
-            "MD5_Hash": "c3add7b94781ee70ec7c817c79f7b7bd",
-            "Description": null,
-            "Length": 7,
-            "pssh_finished": 0
-          }
+           {
+             "Primary_Accession": null|"123",
+             "Sequence": "acb",
+             "MD5_Hash": "hash",
+             "Description": null|"abc",
+             "Length": 3,
+             "pssh_finished": 0|1
+           }
         ],
         "count": 1
       }
      ```
+   - 404, Not Found:
+
+     ```javascript
+      {
+        "data": [],
+        "count": 0
+      }
+     ```
+     
+   - 500, Internal Server Error.
+-  GET `/api/md5/:md5`: Returns the entry from `protein_sequence_unified` if `:md5` matches an entry, or error instead. Same as above
+-   POST `/api/sequence`: Inserts a sequence to be processes via PSSH. The calls can be formatted as `multipart/form-data`, `application/x-www-form-urlencoded` or `application/json`, and the body should be as:
+
+   ```javascript
+      {
+        "sequence": "abc",
+        "email": "email@domain.com"
+      }
+     ```
+     Possible returns include
+   - 201, Created:
+   
+      ```javascript
+      {
+         "fieldCount": 0,
+         "affectedRows": 1,
+         "insertId": 0,
+         "serverStatus": 2,
+         "warningCount": 0,
+         "message": "",
+         "protocol41": true,
+         "changedRows": 0
+      }
+     ```
+   - 422, Unprocessable Entity:
+   
+      ```javascript
+      {
+        "code": "ER_DUP_ENTRY",
+        "errno": 1062,
+        "sqlState": "23000",
+        "index": 0
+      }
+     ```
+   - 415, Unsuported Media Type.
+   - 500, Internal Server Error.
+- POST `/api/fasta`: Inserts (a) sequence(s) to be processes via PSSH or one sequence and it's calculated PSSH. The calls can only be formatted as `multipart/form-data`, and the body should be as:
+      ```javascript
+        {
+         "sequence": "abc",
+         "email": "email@domain.com"
+         }
+      ```
+Possible returns include
+     
+   - 415, Unsuported Media Type.
+   - 500, Internal Server Error.
