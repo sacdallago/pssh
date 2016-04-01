@@ -100,8 +100,10 @@ module.exports = function(context) {
                             });
                         }
 
+                        var sequences = [];
+
                         try {
-                            var sequences = context.biojs.parse(fastaData);
+                            sequences = context.biojs.parse(fastaData);
                         } catch (err) {
                             console.error("Could not parse Fasta file");
                             return response.status(500).send("Could not parse Fasta file");
@@ -162,8 +164,10 @@ module.exports = function(context) {
                                         error: "Not able to parse sequence"
                                     });
                                 } else {
+                                    var md5;
+                                    
                                     try {
-                                        const md5 = context.crypto.createHash('md5').update(seq).digest('hex');
+                                        md5 = context.crypto.createHash('md5').update(seq).digest('hex');
                                     } catch (err){
                                         console.error("Could not generate one MD5 hash");
                                         return response.status(500).send("Could not generate one MD5 hash, request aborted.");
