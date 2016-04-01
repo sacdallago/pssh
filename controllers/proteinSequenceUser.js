@@ -100,13 +100,11 @@ module.exports = function(context) {
                             });
                         }
 
-                        var sequences = [];
-
                         try {
-                            sequences = context.biojs.parse(fastaData);
+                            var sequences = context.biojs.parse(fastaData);
                         } catch (err) {
-                            console.error("Could not generate MD5 hash");
-                            return response.status(500).send("Could not generate MD5 hash");
+                            console.error("Could not parse Fasta file");
+                            return response.status(500).send("Could not parse Fasta file");
                         }
 
                         if(pssh){
@@ -164,7 +162,13 @@ module.exports = function(context) {
                                         error: "Not able to parse sequence"
                                     });
                                 } else {
-                                    const md5 = context.crypto.createHash('md5').update(seq).digest('hex');
+                                    try {
+                                        const md5 = context.crypto.createHash('md5').update(seq).digest('hex');
+                                    } catch (err){
+                                        console.error("Could not generate one MD5 hash");
+                                        return response.status(500).send("Could not generate one MD5 hash, request aborted.");
+                                    }
+
                                     const description = sequence.name;
 
                                     proteinSequenceUserDao.insertInProteinSequenceUpload(email, seq, md5, description).then(function(data){
