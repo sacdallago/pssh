@@ -101,7 +101,9 @@ module.exports = function(context) {
                         }
 
                         var sequences = [];
+                        var psshPromise = context.promises.defer();
 
+                        // Try to read sequences
                         try {
                             sequences = context.biojs.parse(fastaData);
                         } catch (err) {
@@ -109,47 +111,34 @@ module.exports = function(context) {
                             return response.status(500).send("Could not parse Fasta file");
                         }
 
+                        //If PSSH file is defined, try to read the file and popoulate the psshArray
                         if(pssh){
-                            if(sequences.length != 1){
-                                return response.status(415).send("Allowed calls include:\n"+
-                                                                 "- multipart/form-data\n"+
-                                                                 "With attributes 'email', 'fasta' and optional 'pssh'\n"+
-                                                                 "If sending fasta + pssh files, only one sequence can be present in the fasta file."
-                                                                );
-                            } else {
-                                // Try to insert FASTA here, then if inserted, go on.
-                                context.fs.readFile(pssh.path, 'utf8', function (psshError, psshData) {
-                                    if(psshError){
-                                        return response.status(500).send({
-                                            message: "Internal Server error when reading pssh2 file."
-                                        });
-                                    } else {
-                                        var psshArray = context.psshParser.parsePSSH2file(psshData);
-                                        // Insert sequence with pssh_calculated = 1 + insert PSSH
+                            context.fs.readFile(pssh.path, 'utf8', function (psshError, psshData) {
+                                if(psshError){
+                                    return response.status(500).send({
+                                        message: "Internal Server error when reading pssh2 file."
+                                    });
+                                } else {
+                                    var psshArray = context.psshParser.parsePSSH2file(psshData);
 
-                                        psshArray = psshArray.map(function(element){
-                                            return [
-                                                element.protein_sequence_hash,
-                                                element.PDB_chain_hash,
-                                                element.Repeat_domains,
-                                                element.E_value,
-                                                element.Identity_Score,
-                                                element.Match_length,
-                                                element.Alignment
-                                            ];
-                                        });
-                                        psshUserDao.insertInPSSHUser(psshArray).then(function(data){
-                                            return response.status(201).send(data);
-                                        }, function(error){
-                                            console.error("Error while trying to insert pssh:");
-                                            console.error(error.code);
-                                            return response.status(500).send(error);
-                                        });
-                                    }
-                                });
-
-                            }
+                                    psshPromise.resolve(psshArray.map(function(element){
+                                        return [
+                                            element.protein_sequence_hash,
+                                            element.PDB_chain_hash,
+                                            element.Repeat_domains,
+                                            element.E_value,
+                                            element.Identity_Score,
+                                            element.Match_length,
+                                            element.Alignment
+                                        ];
+                                    }));
+                                }
+                            });
                         } else {
+                            psshPromise.resolve([]);
+                        }
+
+                        psshPromise.promise.then(function(psshArray){
                             var promises = [];
 
                             sequences.forEach(function(sequence){
@@ -165,7 +154,7 @@ module.exports = function(context) {
                                     });
                                 } else {
                                     var md5;
-                                    
+
                                     try {
                                         md5 = context.crypto.createHash('md5').update(seq).digest('hex');
                                     } catch (err){
@@ -175,7 +164,11 @@ module.exports = function(context) {
 
                                     const description = sequence.name;
 
-                                    proteinSequenceUserDao.insertInProteinSequenceUpload(email, seq, md5, description).then(function(data){
+                                    var associatedPSSH = psshArray.filter(function(element){
+                                        return element[0] === md5;
+                                    });
+
+                                    proteinSequenceUserDao.insertInProteinSequenceUploadAndPSSH(email, seq, md5, description, associatedPSSH).then(function(data){
                                         deferred.resolve({
                                             md5: md5,
                                             sequence: seq
@@ -202,7 +195,7 @@ module.exports = function(context) {
                                     })
                                 });
                             });
-                        }
+                        });
                     });
                 });
             } else {
