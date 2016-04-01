@@ -173,9 +173,11 @@ module.exports = function(context) {
                                             md5: md5,
                                             sequence: seq
                                         });
-                                        spawnPSSH({
-                                            sequence: seq
-                                        });
+                                        if (associatedPSSH.length < 1){
+                                            spawnPSSH({
+                                                sequence: seq
+                                            });
+                                        }
                                     }, function(error){
                                         deferred.resolve({
                                             md5: md5,

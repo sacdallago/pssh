@@ -51,25 +51,37 @@ module.exports = function(context) {
                     context.db.query(query, function(err, rows) {
                         if (err) {
                             deferred.reject(err);
-                        }
-
-                        console.log("QUERYING: " + pssh);
-                        context.db.query(pssh, function(err, result) {
-                            if (err) {
-                                return context.db.rollback(function() {
-                                    deferred.reject(err);
-                                });
-                            }  
-                            context.db.commit(function(err) {
+                            context.db.commit(function(comError) {
+                                if (comError) {
+                                    // The rollback will rollback every sequence uploaded together with the one containing the PSSH that failed!
+                                    return context.db.rollback(function() {
+                                        deferred.reject(comError);
+                                    });
+                                }
+                                // Everything worked :)
+                                deferred.reject(err);
+                            });
+                        } else {
+                            console.log("QUERYING: " + pssh);
+                            context.db.query(pssh, function(err, result) {
                                 if (err) {
                                     return context.db.rollback(function() {
                                         deferred.reject(err);
                                     });
                                 }
-                                // Everything worked!
-                                deferred.resolve(rows);
+                                context.db.commit(function(err) {
+                                    if (err) {
+                                        // The rollback will rollback every sequence uploaded together with the one containing the PSSH that failed!
+                                        return context.db.rollback(function() {
+                                            deferred.reject(err);
+                                        });
+                                    }
+                                    // Everything worked :)
+                                    deferred.resolve(rows);
+                                });
                             });
-                        });
+
+                        }
                     });
                 });
 
