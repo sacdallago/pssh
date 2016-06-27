@@ -14,7 +14,7 @@ module.exports = function(context) {
 
     // Internal functions
     const spawnPSSH = function(sequence){
-        const sleep = context.childProcess.spawn('sleep', ['10']);
+        const sleep = context.childProcess.spawn('pssh2-seq', ['-s']);
 
         sleep.on('close', (code) => {
             if(code === 0){
