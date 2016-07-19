@@ -58,8 +58,8 @@ module.exports = {
             const path = require('path');
             const util = require('util');
             const fs = require('fs');
-            const https = require('https');
-            const childProcess = require('child_process');
+            const http = require('http');
+            
 
             const config = require('./configuration');
 
@@ -91,7 +91,6 @@ module.exports = {
             context.passwordGenerator = passwordGenerator;
             context.mysql = mysql;
             context.biojs = biojs;
-            context.childProcess = childProcess;
             context.psshParser = psshParser;
 
             context.smtpTransporter = {};
@@ -122,13 +121,6 @@ module.exports = {
                 var sql = "SELECT * FROM ?? WHERE ?? = ?";
                 var inserts = [table, field, where];
                 return context.mysql.format(sql, inserts);
-            };
-
-            // Load HTTPS layer
-            var securityOptions = {
-                key: context.fs.readFileSync(context.config.security.key),
-                cert: context.fs.readFileSync(context.config.security.cert),
-                requestCert: true
             };
 
             // Initialize express
@@ -216,8 +208,8 @@ module.exports = {
 
             // Workers can share any TCP connection
             // In this case it is an HTTP server
-            https
-                .createServer(securityOptions, context.app)
+            http
+                .createServer(context.app)
                 .listen(context.config.app.port, function() {
                 console.log('Worker listening on port %s', context.config.app.port);
             });

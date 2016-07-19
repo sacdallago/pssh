@@ -12,19 +12,10 @@ module.exports = function(context) {
     const proteinSequenceUserDao = context.component('daos').module('proteinSequenceUser');
     const psshUserDao = context.component('daos').module('psshUser');
 
-    // Internal functions
-    const spawnPSSH = function(sequence){
-        const sleep = context.childProcess.spawn('pssh2-seq', ['-s']);
-
-        sleep.on('close', (code) => {
-            if(code === 0){
-                console.log('Calculated PSSH', sequence);
-            } else {
-                console.error('Failed to calculate PSSH', sequence);
-            }
-        });
-        return;
-    };
+    // To calculate the PSSH, the logic in the file "pssh.js" in the root of the app is used!
+    const path = require('path');
+    
+    const spawnPSSH = require(path.join(__dirname, '..', 'pssh.js'));
 
     return {
         psshFromSequence: function(request, response) {
@@ -175,6 +166,7 @@ module.exports = function(context) {
                                         });
                                         if (associatedPSSH.length < 1){
                                             spawnPSSH({
+                                                md5: md5,
                                                 sequence: seq
                                             });
                                         }
