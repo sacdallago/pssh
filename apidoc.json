@@ -1,0 +1,7 @@
+{
+  "name": "pssh API",
+  "version": "0.1.0",
+  "description": "This API enables to spawn pssh calculations",
+  "title": "pssh API",
+  "url" : "http://localhost:3000"
+}

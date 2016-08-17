@@ -65,3 +65,6 @@ configuration.js
 # Private and temp files
 private/
 certificates/
+
+# Documentation created via apidoc
+doc/

@@ -1,6 +1,6 @@
 {
   "name": "pssh",
-  "version": "0.0.1",
+  "version": "0.1",
   "description": "Generate PSSH predictions and store them in the Aquaria database",
   "main": "index.js",
   "scripts": {
