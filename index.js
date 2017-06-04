@@ -129,24 +129,26 @@ module.exports = {
             context.app.use(bodyParser.urlencoded({extended: true}));
 
             // Initialize nodemailer
-            context.smtpTransporter = nodemailer.createTransport(config.email.defaultFrom);
+            if(config.email !== undefined){
+                context.smtpTransporter = nodemailer.createTransport(config.email.defaultFrom);
 
-            // SetUp default email sender and subject from configuration
-            context.mailOptions = function(){
-                return {
-                    from: config.email.defaultFrom,
-                    subject: config.email.defaultSubject
+                // SetUp default email sender and subject from configuration
+                context.mailOptions = function(){
+                    return {
+                        from: config.email.defaultFrom,
+                        subject: config.email.defaultSubject
+                    };
                 };
-            };
 
-            // verify connection configuration 
-            context.smtpTransporter.verify(function(error, success) {
-                if (error) {
-                    console.log("This node instance won't be able to send emails! Error: " + error);
-                } else {
-                    console.log("This node instance is able to send emails.");
-                }
-            });
+                // verify connection configuration
+                context.smtpTransporter.verify(function(error, success) {
+                    if (error) {
+                        console.log("This node instance won't be able to send emails! Error: " + error);
+                    } else {
+                        console.log("This node instance is able to send emails.");
+                    }
+                });
+            }
 
             // Initialize router
             context.router = new express.Router();
