@@ -27,7 +27,7 @@ module.exports = function(context) {
         if(request.get('token') == context.token){
             return next();
         } else {
-            return response.sendStatus(401).send({
+            return response.status(401).send({
                 message: 'Wrong token.'
             });
         }

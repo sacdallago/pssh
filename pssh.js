@@ -1,7 +1,6 @@
 /*jshint esversion: 6 */
 
 // Logic to perform PSSH calculation
-
 const fs            = require('fs');
 const path          = require('path');
 const dir           = path.join(__dirname, 'private');
@@ -34,8 +33,8 @@ module.exports = function(options) {
                 cwd: tempDir
             });
 
-            pssh.stdout.on('data', (data) => {
-                console.log(`stdout: ${data}`);
+            pssh.stdout.on('data', function(data){
+                console.log("stdout: " + data);
             });
 
             return pssh.on('close', function(code){
