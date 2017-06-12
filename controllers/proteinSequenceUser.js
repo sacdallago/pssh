@@ -167,7 +167,7 @@ module.exports = function(context) {
                                 return response.status(500).send("Could not generate one MD5 hash, request aborted.");
                             }
 
-                            const description = sequence.name;
+                            const description = sequence.name || md5;
 
                             var associatedPSSH = psshArray.filter(function(element){
                                 return element[0] === md5;
