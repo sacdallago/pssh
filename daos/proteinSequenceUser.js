@@ -36,7 +36,7 @@ module.exports = function(context) {
             var query = context.mysql.format("INSERT INTO `protein_sequence_uploaded` (`email`, `sequence`, `md5_hash`) VALUES (?,?,?);", [email, sequence, md5]);
 
             if(description){
-                query = context.mysql.format("INSERT INTO `protein_sequence_uploaded` (`email`, `sequence`, `md5_hash`, `description` ,`Primary_Accession`) VALUES (?,?,?,?,?);", [email, sequence, md5, description, description]);
+                query = context.mysql.format("INSERT INTO `protein_sequence_uploaded` (`email`, `sequence`, `md5_hash`, `description`) VALUES (?,?,?,?);", [email, sequence, md5, description]);
             }
 
             if(associatedPSSH.length > 0) {
